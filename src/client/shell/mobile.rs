@@ -657,34 +657,19 @@ fn mobile_items(
                 .map(|workspace| workspace.label.as_str())
                 .unwrap_or(agent_label);
             let mut detail = Vec::new();
-            let workspace_tab_count = endpoint
-                .snapshot
-                .tabs
-                .iter()
-                .filter(|candidate| candidate.workspace_id == agent.workspace_id)
-                .count();
-            if let Some(tab) = tab.filter(|tab| tab.custom_label || workspace_tab_count > 1) {
-                detail.push(tab.label.clone());
-            }
-            let status_key = status_text(agent.agent_status);
-            detail.push(
-                agent
-                    .state_labels
-                    .iter()
-                    .find(|(key, _)| key == status_key)
-                    .map(|(_, label)| label.clone())
-                    .unwrap_or_else(|| {
-                        if agent.agent_status == crate::api::schema::AgentStatus::Unknown {
-                            "idle".to_owned()
-                        } else {
-                            status_key.to_owned()
-                        }
-                    }),
-            );
             detail.push(agent_label.to_owned());
+            let session_title = agent
+                .terminal_title_stripped
+                .as_deref()
+                .or(agent.terminal_title.as_deref())
+                .or(agent.title.as_deref());
+            if let Some(title) = session_title.filter(|t| !t.trim().is_empty()) {
+                detail.push(title.to_owned());
+            }
             if endpoint.stale() {
                 detail.push(mobile_endpoint_state(endpoint.status).to_owned());
             }
+            let tab_label = tab.map(|t| format!(" · {}", t.label)).unwrap_or_default();
             let background = if endpoint.endpoint_id == active_endpoint_id && agent.focused {
                 palette.surface_dim
             } else {
@@ -718,7 +703,7 @@ fn mobile_items(
                         Span::styled(" ", Style::default().bg(background)),
                         Span::styled(
                             crate::ui::truncate_end(
-                                &format!("{} · {primary}", endpoint.label),
+                                &format!("{} · {primary}{tab_label}", endpoint.label),
                                 usize::from(content_width.saturating_sub(5)),
                             ),
                             Style::default()
