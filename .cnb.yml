@@ -16,7 +16,7 @@ master:
         - name: 安装校验过的 Bun
           script: "curl -fLsS --max-time 300 https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip -o /tmp/bun.zip && printf \"%s\\n\" \"951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f  /tmp/bun.zip\" | sha256sum --check && unzip -q /tmp/bun.zip -d /tmp/bun && install /tmp/bun/bun-linux-x64/bun /usr/local/bin/bun"
         - name: 校验并缓存锁定依赖
-          script: "test \"$(ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" zig fetch .cnb/deps/translate-c-4e879eb8.tar.gz)\" = \"translate_c-0.0.0-Q_BUWhVNBwDOEcIqub4VFPJPB6D9dgwzUMHTX5KWr8Xr\""
+          script: "test \"$(cd vendor/libghostty-vt && ZIG_GLOBAL_CACHE_DIR=\"$OLDPWD/.zig-cache\" zig fetch ../../.cnb/deps/translate-c-4e879eb8.tar.gz)\" = \"translate_c-0.0.0-Q_BUWhVNBwDOEcIqub4VFPJPB6D9dgwzUMHTX5KWr8Xr\""
         - name: Linux lint
           script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just lint"
         - name: Linux 测试
@@ -40,7 +40,7 @@ master:
         - name: 安装校验过的 Bun
           script: "curl -fLsS --max-time 300 https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip -o /tmp/bun.zip && printf \"%s\\n\" \"951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f  /tmp/bun.zip\" | sha256sum --check && unzip -q /tmp/bun.zip -d /tmp/bun && install /tmp/bun/bun-linux-x64/bun /usr/local/bin/bun"
         - name: 校验并缓存锁定依赖
-          script: "test \"$(ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" zig fetch .cnb/deps/translate-c-4e879eb8.tar.gz)\" = \"translate_c-0.0.0-Q_BUWhVNBwDOEcIqub4VFPJPB6D9dgwzUMHTX5KWr8Xr\""
+          script: "test \"$(cd vendor/libghostty-vt && ZIG_GLOBAL_CACHE_DIR=\"$OLDPWD/.zig-cache\" zig fetch ../../.cnb/deps/translate-c-4e879eb8.tar.gz)\" = \"translate_c-0.0.0-Q_BUWhVNBwDOEcIqub4VFPJPB6D9dgwzUMHTX5KWr8Xr\""
         - name: Linux lint
           script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just lint"
         - name: Linux 测试
@@ -65,7 +65,7 @@ cnb-migration/linux-ci:
         - name: 安装校验过的 Bun
           script: "curl -fLsS --max-time 300 https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip -o /tmp/bun.zip && printf \"%s\\n\" \"951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f  /tmp/bun.zip\" | sha256sum --check && unzip -q /tmp/bun.zip -d /tmp/bun && install /tmp/bun/bun-linux-x64/bun /usr/local/bin/bun"
         - name: 校验并缓存锁定依赖
-          script: "test \"$(ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" zig fetch .cnb/deps/translate-c-4e879eb8.tar.gz)\" = \"translate_c-0.0.0-Q_BUWhVNBwDOEcIqub4VFPJPB6D9dgwzUMHTX5KWr8Xr\""
+          script: "test \"$(cd vendor/libghostty-vt && ZIG_GLOBAL_CACHE_DIR=\"$OLDPWD/.zig-cache\" zig fetch ../../.cnb/deps/translate-c-4e879eb8.tar.gz)\" = \"translate_c-0.0.0-Q_BUWhVNBwDOEcIqub4VFPJPB6D9dgwzUMHTX5KWr8Xr\""
         - name: Linux lint
           script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just lint"
         - name: Linux 测试
