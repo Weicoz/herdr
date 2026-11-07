@@ -1,0 +1,68 @@
+master:
+  push:
+    - docker:
+        image: rust:1.96.1-bookworm
+      stages:
+        - name: 安装系统工具
+          script: "apt-get update && apt-get install -y --no-install-recommends python3 curl unzip xz-utils pkg-config"
+        - name: 安装 Rust 检查组件
+          script: "rustup component add rustfmt clippy"
+        - name: 安装校验过的 just
+          script: "curl -fLsS --max-time 300 https://github.com/casey/just/releases/download/1.59.0/just-1.59.0-x86_64-unknown-linux-musl.tar.gz -o /tmp/just.tar.gz && printf \"%s\\n\" \"409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e  /tmp/just.tar.gz\" | sha256sum --check && tar -xzf /tmp/just.tar.gz -C /usr/local/bin just"
+        - name: 安装校验过的 nextest
+          script: "curl -fLsS --max-time 300 https://github.com/nextest-rs/nextest/releases/download/cargo-nextest-0.9.151/cargo-nextest-0.9.151-x86_64-unknown-linux-musl.tar.gz -o /tmp/nextest.tar.gz && printf \"%s\\n\" \"6b284d6fde9670dfb6ee10ea9d9abbc85f95643d3f592472d420d82e257b3a6c  /tmp/nextest.tar.gz\" | sha256sum --check && tar -xzf /tmp/nextest.tar.gz -C /usr/local/bin cargo-nextest"
+        - name: 安装校验过的 Zig
+          script: "curl -fLsS --max-time 300 https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz -o /tmp/zig.tar.xz && printf \"%s\\n\" \"70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /tmp/zig.tar.xz\" | sha256sum --check && mkdir -p /opt/zig && tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1 && ln -s /opt/zig/zig /usr/local/bin/zig"
+        - name: 安装校验过的 Bun
+          script: "curl -fLsS --max-time 300 https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip -o /tmp/bun.zip && printf \"%s\\n\" \"951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f  /tmp/bun.zip\" | sha256sum --check && unzip -q /tmp/bun.zip -d /tmp/bun && install /tmp/bun/bun-linux-x64/bun /usr/local/bin/bun"
+        - name: Linux lint
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just lint"
+        - name: Linux 测试
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just ci-tests 'all()'"
+        - name: 标量终端安全测试
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" LIBGHOSTTY_VT_SIMD=false LIBGHOSTTY_VT_OPTIMIZE=ReleaseSafe timeout 1200 cargo nextest run --locked -E 'package(ghostty-vt) | test(ghostty)' --status-level fail --final-status-level fail --failure-output final --success-output never"
+  pull_request:
+    - docker:
+        image: rust:1.96.1-bookworm
+      stages:
+        - name: 安装系统工具
+          script: "apt-get update && apt-get install -y --no-install-recommends python3 curl unzip xz-utils pkg-config"
+        - name: 安装 Rust 检查组件
+          script: "rustup component add rustfmt clippy"
+        - name: 安装校验过的 just
+          script: "curl -fLsS --max-time 300 https://github.com/casey/just/releases/download/1.59.0/just-1.59.0-x86_64-unknown-linux-musl.tar.gz -o /tmp/just.tar.gz && printf \"%s\\n\" \"409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e  /tmp/just.tar.gz\" | sha256sum --check && tar -xzf /tmp/just.tar.gz -C /usr/local/bin just"
+        - name: 安装校验过的 nextest
+          script: "curl -fLsS --max-time 300 https://github.com/nextest-rs/nextest/releases/download/cargo-nextest-0.9.151/cargo-nextest-0.9.151-x86_64-unknown-linux-musl.tar.gz -o /tmp/nextest.tar.gz && printf \"%s\\n\" \"6b284d6fde9670dfb6ee10ea9d9abbc85f95643d3f592472d420d82e257b3a6c  /tmp/nextest.tar.gz\" | sha256sum --check && tar -xzf /tmp/nextest.tar.gz -C /usr/local/bin cargo-nextest"
+        - name: 安装校验过的 Zig
+          script: "curl -fLsS --max-time 300 https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz -o /tmp/zig.tar.xz && printf \"%s\\n\" \"70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /tmp/zig.tar.xz\" | sha256sum --check && mkdir -p /opt/zig && tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1 && ln -s /opt/zig/zig /usr/local/bin/zig"
+        - name: 安装校验过的 Bun
+          script: "curl -fLsS --max-time 300 https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip -o /tmp/bun.zip && printf \"%s\\n\" \"951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f  /tmp/bun.zip\" | sha256sum --check && unzip -q /tmp/bun.zip -d /tmp/bun && install /tmp/bun/bun-linux-x64/bun /usr/local/bin/bun"
+        - name: Linux lint
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just lint"
+        - name: Linux 测试
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just ci-tests 'all()'"
+        - name: 标量终端安全测试
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" LIBGHOSTTY_VT_SIMD=false LIBGHOSTTY_VT_OPTIMIZE=ReleaseSafe timeout 1200 cargo nextest run --locked -E 'package(ghostty-vt) | test(ghostty)' --status-level fail --final-status-level fail --failure-output final --success-output never"
+cnb-migration/linux-ci:
+  push:
+    - docker:
+        image: rust:1.96.1-bookworm
+      stages:
+        - name: 安装系统工具
+          script: "apt-get update && apt-get install -y --no-install-recommends python3 curl unzip xz-utils pkg-config"
+        - name: 安装 Rust 检查组件
+          script: "rustup component add rustfmt clippy"
+        - name: 安装校验过的 just
+          script: "curl -fLsS --max-time 300 https://github.com/casey/just/releases/download/1.59.0/just-1.59.0-x86_64-unknown-linux-musl.tar.gz -o /tmp/just.tar.gz && printf \"%s\\n\" \"409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e  /tmp/just.tar.gz\" | sha256sum --check && tar -xzf /tmp/just.tar.gz -C /usr/local/bin just"
+        - name: 安装校验过的 nextest
+          script: "curl -fLsS --max-time 300 https://github.com/nextest-rs/nextest/releases/download/cargo-nextest-0.9.151/cargo-nextest-0.9.151-x86_64-unknown-linux-musl.tar.gz -o /tmp/nextest.tar.gz && printf \"%s\\n\" \"6b284d6fde9670dfb6ee10ea9d9abbc85f95643d3f592472d420d82e257b3a6c  /tmp/nextest.tar.gz\" | sha256sum --check && tar -xzf /tmp/nextest.tar.gz -C /usr/local/bin cargo-nextest"
+        - name: 安装校验过的 Zig
+          script: "curl -fLsS --max-time 300 https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz -o /tmp/zig.tar.xz && printf \"%s\\n\" \"70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /tmp/zig.tar.xz\" | sha256sum --check && mkdir -p /opt/zig && tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1 && ln -s /opt/zig/zig /usr/local/bin/zig"
+        - name: 安装校验过的 Bun
+          script: "curl -fLsS --max-time 300 https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip -o /tmp/bun.zip && printf \"%s\\n\" \"951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f  /tmp/bun.zip\" | sha256sum --check && unzip -q /tmp/bun.zip -d /tmp/bun && install /tmp/bun/bun-linux-x64/bun /usr/local/bin/bun"
+        - name: Linux lint
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just lint"
+        - name: Linux 测试
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" timeout 1200 just ci-tests 'all()'"
+        - name: 标量终端安全测试
+          script: "NO_PROXY=* no_proxy=* CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=1 CARGO_PROFILE_TEST_DEBUG=1 CARGO_INCREMENTAL=1 ZIG_GLOBAL_CACHE_DIR=\"$PWD/.zig-cache\" ZIG_LOCAL_CACHE_DIR=\"$PWD/.zig-cache\" LIBGHOSTTY_VT_SIMD=false LIBGHOSTTY_VT_OPTIMIZE=ReleaseSafe timeout 1200 cargo nextest run --locked -E 'package(ghostty-vt) | test(ghostty)' --status-level fail --final-status-level fail --failure-output final --success-output never"
